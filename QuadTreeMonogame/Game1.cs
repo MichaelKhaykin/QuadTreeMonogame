@@ -35,6 +35,9 @@ namespace QuadTreeMonogame
         TextBox radiusTextBox;
 
         int gap = 200;
+
+        bool isDragging = false;
+        int indexOfDraggedCircle = 0;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -67,6 +70,7 @@ namespace QuadTreeMonogame
 
             var font = Content.Load<SpriteFont>("Font");
 
+            radiusLabel = new TextLabel(new Vector2(gap / 2 - 30, 30), Color.Black, "Radius:", font);
 
             radiusTextBox = new TextBox(GraphicsDevice, new Rectangle(gap / 2 - 50, 50, 100, 18), font,
                                         Color.Black, Color.White, Color.Black,
@@ -108,7 +112,11 @@ namespace QuadTreeMonogame
             MouseState mouse = Mouse.GetState();
 
             Window.Title = "Epstein didn't kill himself";
-
+            
+            //This doesn't have to be done, but it allows for moving the circles and rebuilding
+            //the tree on the fly as well as the re-splits 
+            qTree.Clear();
+            Splits.Clear();
 
             var radiusValue = 5;
             float ogSize = circleTexture.Width / 2;
@@ -117,25 +125,39 @@ namespace QuadTreeMonogame
                 radiusValue = int.Parse(radiusTextBox.Text);
                 radiusValue = MathHelper.Clamp(radiusValue, 5, 10);
             }
-            foreach (var circle in circles)
+            for(int i = 0; i < circles.Count; i++)
             {
+                var circle = circles[i];
+
                 circle.Color = Color.Red;
                 circle.Scale = Vector2.One * (radiusValue / ogSize);
+              
+                if(isDragging && i == indexOfDraggedCircle)
+                {
+                    circle.Position = mouse.Position.ToVector2();
+                }
+
+                qTree.Add(circle.HitBox);
             }
 
             if (mainView.Bounds.Contains(mouse.Position))
             {
-                if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
+                if (mouse.LeftButton == ButtonState.Released)
                 {
-                    var circle = new Sprite(circleTexture, mouse.Position.ToVector2(), Color.Red, Vector2.One * (radiusValue / ogSize));
-                    circles.Add(circle);
-
-                    qTree.Add(circle.HitBox);
+                    isDragging = false;
                 }
 
-                foreach (var circle in circles)
+                for (int i = 0; i < circles.Count; i++)
                 {
+                    var circle = circles[i];
+
                     if (!circle.HitBox.Contains(mouse.Position)) continue;
+
+                    if (mouse.LeftButton == ButtonState.Pressed)
+                    {
+                        isDragging = true;
+                        indexOfDraggedCircle = i;
+                    }
 
                     var resultingObjects = qTree.Retrieve(new List<Rectangle>(), circle.HitBox);
                     foreach (var rect in resultingObjects)
@@ -149,6 +171,16 @@ namespace QuadTreeMonogame
                         }
                     }
                     break;
+                }
+
+
+                if (mouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released &&
+                    !isDragging)
+                {
+                    var circle = new Sprite(circleTexture, mouse.Position.ToVector2(), Color.Red, Vector2.One * (radiusValue / ogSize));
+                    circles.Add(circle);
+
+                    qTree.Add(circle.HitBox);
                 }
 
                 oldMouse = mouse;
@@ -207,6 +239,7 @@ namespace QuadTreeMonogame
 
             whiteBackGround.Draw(spriteBatch);
             radiusTextBox.Draw(spriteBatch);
+            radiusLabel.Draw(spriteBatch);
 
             spriteBatch.End();
 
