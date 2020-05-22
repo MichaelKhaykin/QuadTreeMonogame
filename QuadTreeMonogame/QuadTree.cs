@@ -16,7 +16,6 @@ namespace QuadTreeMonogame
         private List<Rectangle> RectanglesInBounds;
 
         private const int MaxObjectsInAZone = 4;
-        private const int MaxLevels = 5;
 
         private int level;
 
@@ -46,7 +45,7 @@ namespace QuadTreeMonogame
         }
         private void Split()
         {
-            Game1.Splits.Add(Bounds);
+            Main.Splits.Add(Bounds);
 
             var x = Bounds.X;
             var y = Bounds.Y;
@@ -111,7 +110,7 @@ namespace QuadTreeMonogame
 
             RectanglesInBounds.Add(rect);
 
-            if (RectanglesInBounds.Count >= MaxObjectsInAZone)//&& level < MaxLevels)
+            if (RectanglesInBounds.Count >= MaxObjectsInAZone)
             {
                 if (ChildNodes[0] == null)
                 {
