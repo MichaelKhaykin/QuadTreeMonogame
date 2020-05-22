@@ -45,7 +45,7 @@ namespace QuadTreeMonogame
         }
         private void Split()
         {
-            Main.Splits.Add(Bounds);
+            QuadTreeHitCollisionDemo.Splits.Add(Bounds);
 
             var x = Bounds.X;
             var y = Bounds.Y;

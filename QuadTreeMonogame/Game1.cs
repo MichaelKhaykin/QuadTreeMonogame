@@ -13,7 +13,7 @@ namespace QuadTreeMonogame
         SpriteBatch spriteBatch;
 
         Dictionary<Screens, Screen> ScreenManager = new Dictionary<Screens, Screen>();
-        public static Screens CurrentScreen;
+        public static Screens CurrentScreen = Screens.Main;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -37,6 +37,8 @@ namespace QuadTreeMonogame
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             ScreenManager.Add(Screens.Main, new Main(GraphicsDevice, Content));
+            ScreenManager.Add(Screens.QuadTreeCollision, new QuadTreeHitCollisionDemo(GraphicsDevice, Content));
+            ScreenManager.Add(Screens.QuadTreeImage, new QuadTreeImageDemo(GraphicsDevice, Content));
 
             // TODO: use this.Content to load your game content here
         }

@@ -10,6 +10,6 @@ namespace QuadTreeMonogame
     {
         Main,
         QuadTreeImage,
-        QuadTreeCircle
+        QuadTreeCollision
     }
 }
