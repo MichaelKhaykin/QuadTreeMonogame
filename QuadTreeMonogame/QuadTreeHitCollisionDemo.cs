@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,12 +13,19 @@ using System.Threading.Tasks;
 
 namespace QuadTreeMonogame
 {
+    public class WrapperRectangle : IHasRectangle
+    {
+        public Rectangle Rectangle { get; set; }
+
+        public static implicit operator Rectangle(WrapperRectangle r) => r.Rectangle;
+        public static implicit operator WrapperRectangle(Rectangle r) => new WrapperRectangle() { Rectangle = r };
+    }
     public class QuadTreeHitCollisionDemo : Screen
     {
         List<Sprite> circles = new List<Sprite>();
         Texture2D circleTexture;
 
-        QuadTree qTree;
+        QuadTree<WrapperRectangle> qTree;
 
         public static List<Rectangle> Splits = new List<Rectangle>();
 
@@ -80,7 +88,7 @@ namespace QuadTreeMonogame
             circles = new List<Sprite>();
             circleTexture = Content.Load<Texture2D>("circley");
 
-            qTree = new QuadTree(0, new Rectangle(0, 0, width - gap, graphics.Viewport.Height));
+            qTree = new QuadTree<WrapperRectangle>(new Rectangle(0, 0, width - gap, graphics.Viewport.Height));
         }
 
         public override void Update(GameTime gameTime)
@@ -131,7 +139,7 @@ namespace QuadTreeMonogame
                         indexOfDraggedCircle = i;
                     }
 
-                    var resultingObjects = qTree.Retrieve(new List<Rectangle>(), circle.HitBox);
+                    var resultingObjects = qTree.Retrieve(new List<WrapperRectangle>(), circle.HitBox);
                     foreach (var rect in resultingObjects)
                     {
                         foreach (var circlex in circles)

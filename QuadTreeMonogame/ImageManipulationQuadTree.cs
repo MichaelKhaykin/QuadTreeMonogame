@@ -1,25 +1,32 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace QuadTreeMonogame
 {
-    public class QuadTree<T> where T : IHasRectangle
+    public class ImageManipulationQuadTree<T>
+        where T : IHasPixel
     {
         public Rectangle Bounds;
 
-        protected QuadTree<T>[] ChildNodes;
+        protected ImageManipulationQuadTree<T>[] ChildNodes;
 
-        protected List<T> RectanglesInBounds;
-
-        protected const int MaxObjectsInAZone = 4;
+        public List<T> RectanglesInBounds;
 
         protected int level;
-        //most likely will be size of form
-        public QuadTree(int pLevel, Rectangle initalBounds)
+
+        public ImageManipulationQuadTree(Rectangle initalBounds)
+            :this(0, initalBounds)
+        {
+
+        }
+
+        public ImageManipulationQuadTree(int pLevel, Rectangle initalBounds)
         {
             level = pLevel;
 
@@ -27,40 +34,7 @@ namespace QuadTreeMonogame
 
             RectanglesInBounds = new List<T>();
 
-            ChildNodes = new QuadTree<T>[4];
-        }
-
-        public QuadTree(Rectangle initalBounds)
-            : this(pLevel: 0, initalBounds)
-        {
-
-        }
-        public void Clear()
-        {
-            RectanglesInBounds.Clear();
-            for (int i = 0; i < ChildNodes.Length; i++)
-            {
-                if (ChildNodes[i] != null)
-                {
-                    ChildNodes[i].Clear();
-                    ChildNodes[i] = null;
-                }
-            }
-        }
-        private void Split()
-        {
-            QuadTreeHitCollisionDemo.Splits.Add(Bounds);
-
-            var x = Bounds.X;
-            var y = Bounds.Y;
-            var halfWidth = Bounds.Width / 2;
-            var halfHeight = Bounds.Height / 2;
-
-            ChildNodes[0] = new QuadTree<T>(level + 1, new Rectangle(x + halfWidth, y, halfWidth, halfHeight));
-            ChildNodes[1] = new QuadTree<T>(level + 1, new Rectangle(x, y, halfWidth, halfHeight));
-            ChildNodes[2] = new QuadTree<T>(level + 1, new Rectangle(x, y + halfHeight, halfWidth, halfHeight));
-            ChildNodes[3] = new QuadTree<T>(level + 1, new Rectangle(x + halfWidth, y + halfHeight, halfWidth, halfHeight));
-
+            ChildNodes = new ImageManipulationQuadTree<T>[4];
         }
         private int GetIndex(Rectangle rectangleToSearchFor)
         {
@@ -100,6 +74,18 @@ namespace QuadTreeMonogame
 
             return index;
         }
+        public void Clear()
+        {
+            RectanglesInBounds.Clear();
+            for (int i = 0; i < ChildNodes.Length; i++)
+            {
+                if (ChildNodes[i] != null)
+                {
+                    ChildNodes[i].Clear();
+                    ChildNodes[i] = null;
+                }
+            }
+        }
         public void Add(T rect)
         {
             if (ChildNodes[0] != null)
@@ -115,7 +101,22 @@ namespace QuadTreeMonogame
 
             RectanglesInBounds.Add(rect);
 
-            if (RectanglesInBounds.Count >= MaxObjectsInAZone)
+            int lengthToLoop = RectanglesInBounds.Count < 100 ? RectanglesInBounds.Count : 100;
+            
+            double avgColor = 0;
+            for(int i = 0; i < lengthToLoop; i++)
+            {
+                var pixel = RectanglesInBounds[i];
+
+                avgColor += (0.11) * pixel.Data.B + (0.59) * pixel.Data.G + (0.30) * pixel.Data.R;
+            }
+            avgColor /= RectanglesInBounds.Count;
+
+            var myColor = (0.11) * rect.Data.B + (0.59) * rect.Data.G + (0.30) * rect.Data.R;
+
+            var difference = Math.Abs(myColor - avgColor) * 100 / 255;
+
+            if (difference > 85)
             {
                 if (ChildNodes[0] == null)
                 {
@@ -150,6 +151,25 @@ namespace QuadTreeMonogame
             return returnObjs;
         }
 
+        public List<ImageManipulationQuadTree<T>> Retrieve(List<ImageManipulationQuadTree<T>> returnObjs, int levelDepth = -1)
+        {
+            if (level == levelDepth)
+            {
+                return returnObjs;
+            }
+
+            returnObjs.Add(this);
+            if (ChildNodes[0] != null)
+            {
+                foreach (var node in ChildNodes)
+                {
+                    node.Retrieve(returnObjs, levelDepth);
+                }
+            }
+
+            return returnObjs;
+        }
+     
         public List<T> Retrieve(List<T> returnObjs, int levelDepth = -1)
         {
             if (level == levelDepth)
@@ -167,6 +187,18 @@ namespace QuadTreeMonogame
             }
 
             return returnObjs;
+        }
+        private void Split()
+        {
+            var x = Bounds.X;
+            var y = Bounds.Y;
+            var halfWidth = Bounds.Width / 2;
+            var halfHeight = Bounds.Height / 2;
+
+            ChildNodes[0] = new ImageManipulationQuadTree<T>(level + 1, new Rectangle(x + halfWidth, y, halfWidth, halfHeight));
+            ChildNodes[1] = new ImageManipulationQuadTree<T>(level + 1, new Rectangle(x, y, halfWidth, halfHeight));
+            ChildNodes[2] = new ImageManipulationQuadTree<T>(level + 1, new Rectangle(x, y + halfHeight, halfWidth, halfHeight));
+            ChildNodes[3] = new ImageManipulationQuadTree<T>(level + 1, new Rectangle(x + halfWidth, y + halfHeight, halfWidth, halfHeight));
         }
     }
 }

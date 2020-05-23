@@ -12,4 +12,10 @@ namespace QuadTreeMonogame
         QuadTreeImage,
         QuadTreeCollision
     }
+
+    public enum QuadTreeType
+    {
+        Image,
+        Collision
+    }
 }
