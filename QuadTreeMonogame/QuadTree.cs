@@ -18,7 +18,6 @@ namespace QuadTreeMonogame
         protected const int MaxObjectsInAZone = 4;
 
         protected int level;
-        //most likely will be size of form
         public QuadTree(int pLevel, Rectangle initalBounds)
         {
             level = pLevel;
@@ -60,7 +59,6 @@ namespace QuadTreeMonogame
             ChildNodes[1] = new QuadTree<T>(level + 1, new Rectangle(x, y, halfWidth, halfHeight));
             ChildNodes[2] = new QuadTree<T>(level + 1, new Rectangle(x, y + halfHeight, halfWidth, halfHeight));
             ChildNodes[3] = new QuadTree<T>(level + 1, new Rectangle(x + halfWidth, y + halfHeight, halfWidth, halfHeight));
-
         }
         private int GetIndex(Rectangle rectangleToSearchFor)
         {
@@ -137,9 +135,9 @@ namespace QuadTreeMonogame
                 }
             }
         }
-        public List<T> Retrieve(List<T> returnObjs, Rectangle rect)
+        public List<T> Retrieve(List<T> returnObjs, T rect)
         {
-            var index = GetIndex(rect);
+            var index = GetIndex(rect.Rectangle);
             if (index != -1 && ChildNodes[0] != null)
             {
                 ChildNodes[index].Retrieve(returnObjs, rect);

@@ -13,7 +13,7 @@ namespace QuadTreeMonogame
         SpriteBatch spriteBatch;
 
         Dictionary<Screens, Screen> ScreenManager = new Dictionary<Screens, Screen>();
-        public static Screens CurrentScreen = Screens.Main;
+        public static Screens CurrentScreen = Screens.QuadTreeCollision;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -38,7 +38,7 @@ namespace QuadTreeMonogame
 
             ScreenManager.Add(Screens.Main, new Main(GraphicsDevice, Content));
             ScreenManager.Add(Screens.QuadTreeCollision, new QuadTreeHitCollisionDemo(GraphicsDevice, Content));
-            ScreenManager.Add(Screens.QuadTreeImage, new QuadTreeImageDemo(GraphicsDevice, Content));
+           // ScreenManager.Add(Screens.QuadTreeImage, new QuadTreeImageDemo(GraphicsDevice, Content));
 
             // TODO: use this.Content to load your game content here
         }
@@ -50,7 +50,6 @@ namespace QuadTreeMonogame
 
             InputManager.Mouse = Mouse.GetState();
 
-            Window.Title = "Epstein didn't kill himself";
 
             ScreenManager[CurrentScreen].Update(gameTime);
 
